@@ -1,0 +1,59 @@
+# Flood risk classification thresholds
+# These convert flood probability (0-1) into discrete risk levels
+
+risk_levels:
+  L1:
+    name: "Safe"
+    min_p: 0.00
+    max_p: 0.10
+    color: "#d9d9d9"        # light gray
+    description: "No significant flood risk"
+  L2:
+    name: "Low"
+    min_p: 0.10
+    max_p: 0.40
+    color: "#fee08b"        # yellow (colorblind-safe)
+    description: "Low flood risk — monitor conditions"
+  L3:
+    name: "Moderate"
+    min_p: 0.40
+    max_p: 0.85
+    color: "#f46d43"        # orange (colorblind-safe)
+    description: "Moderate flood risk — prepare for possible flooding"
+  L4:
+    name: "High"
+    min_p: 0.85
+    max_p: 1.00
+    color: "#d73027"        # red (colorblind-safe)
+    description: "High flood risk — flooding very likely"
+
+# Time windows for peak aggregation (hours)
+windows: [6, 12, 24, 48, 72]
+
+# HAND (Height Above Nearest Drainage) threshold
+# Cells with HAND below this value are flood-susceptible
+# Source: typical tropical floodplain threshold (Nobre et al., 2011)
+hand_threshold_m: 2.0
+
+# Drainage capacity per cell (m3 per timestep)
+# Approximate urban drainage for 250m cell in Dangkor's flat terrain
+# Assumption: poor drainage infrastructure, clay soils
+# Source: engineering estimate for developing peri-urban SE Asia
+drainage_capacity_m3: 500.0
+
+# Local storage capacity per cell (m3)
+# Bathtub model: how much water a flat cell can hold before surface flooding
+# Based on 250m x 250m cell with ~8mm ponding depth
+local_storage_capacity_m3: 500.0
+
+# Monte Carlo configuration
+ensemble:
+  n_scenarios: 30
+  rainfall_perturbation_sigma: 0.10   # ±10% lognormal
+  cn_perturbation_sigma: 0.10         # ±10% normal
+  drainage_perturbation_sigma: 0.20   # ±20% normal
+
+# Regional amplifier bounds (Layer 4 fusion)
+regional_amplifier:
+  base: 1.0
+  glofas_flood_boost: 1.3             # applied when GloFAS signals regional flooding

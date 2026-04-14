@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Raw downloaded data (large, re-downloadable)
+data/static/dem_raw/
+data/static/worldcover_raw/
+
+# Keep static processed data
+!data/static/grid.geojson
+!data/static/dangkor_boundary.geojson
+
+# Temporary files
+*.tmp
+last_error.json

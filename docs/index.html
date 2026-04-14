@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dangkor Flood Forecast</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <!-- Disclaimer Banner -->
+    <div id="disclaimer">
+        ⚠ Model-based forecast — NOT an official flood warning.
+        <a href="https://github.com/chhounk/flood-predict-dangkor/blob/main/LIMITATIONS.md" target="_blank">Read limitations</a>
+    </div>
+
+    <!-- Header -->
+    <div id="header">
+        <h1>Dangkor District Flood Forecast</h1>
+        <div id="meta">
+            <span id="last-updated">Loading...</span>
+            <span id="next-update"></span>
+            <a href="methodology.html" class="nav-link">Methodology →</a>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div id="controls">
+        <div id="window-selector">
+            <span class="label">Forecast window:</span>
+            <button class="window-btn" data-window="6h">6h</button>
+            <button class="window-btn" data-window="12h">12h</button>
+            <button class="window-btn active" data-window="24h">24h</button>
+            <button class="window-btn" data-window="48h">48h</button>
+            <button class="window-btn" data-window="72h">72h</button>
+        </div>
+    </div>
+
+    <!-- Map container with overlaid panels -->
+    <div id="map-container">
+        <div id="map"></div>
+
+        <!-- Side panels (float over map) -->
+        <div id="panels">
+            <!-- Legend -->
+            <div class="panel" id="legend-panel">
+                <h3>Risk Level</h3>
+                <div class="legend-item"><span class="swatch" style="background:#d9d9d9;opacity:0.3"></span> L1 Safe (P &lt; 0.10)</div>
+                <div class="legend-item"><span class="swatch" style="background:#fee08b"></span> L2 Low (0.10–0.40)</div>
+                <div class="legend-item"><span class="swatch" style="background:#f46d43"></span> L3 Moderate (0.40–0.85)</div>
+                <div class="legend-item"><span class="swatch" style="background:#d73027"></span> L4 High (≥ 0.85)</div>
+            </div>
+
+            <!-- Confidence -->
+            <div class="panel" id="confidence-panel">
+                <h3>Model Confidence</h3>
+                <div id="gpm-agreement">GPM Agreement: <span id="gpm-value">—</span></div>
+            </div>
+
+            <!-- Summary -->
+            <div class="panel" id="summary-panel">
+                <h3>Summary</h3>
+                <div id="summary-content">Loading...</div>
+            </div>
+
+            <!-- Scorecard -->
+            <div class="panel" id="scorecard-panel">
+                <h3>Model Scorecard</h3>
+                <div id="scorecard-content">Validation data will appear here once collected.</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

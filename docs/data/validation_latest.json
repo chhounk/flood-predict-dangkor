@@ -1,0 +1,34 @@
+{
+  "validation_date": "2026-04-14",
+  "validation_type": "weekly",
+  "engine_version": "engine-v0.1",
+  "period": {
+    "start": "2026-04-07",
+    "end": "2026-04-14"
+  },
+  "observations": {
+    "sentinel1_sar": null,
+    "ground_truth": null,
+    "source": "No observation data available in v1"
+  },
+  "predictions_evaluated": 0,
+  "metrics": {
+    "pod": null,
+    "far": null,
+    "csi": null,
+    "bias": null,
+    "accuracy": null,
+    "note": "Metrics will be populated when observation data becomes available"
+  },
+  "confusion_matrix": {
+    "true_positive": null,
+    "false_positive": null,
+    "true_negative": null,
+    "false_negative": null
+  },
+  "notes": [
+    "Validation framework scaffolded \u2014 no observation data available yet.",
+    "Sentinel-1 SAR comparison is a documented TODO.",
+    "See src/validation/sentinel1_stub.py for implementation notes."
+  ]
+}

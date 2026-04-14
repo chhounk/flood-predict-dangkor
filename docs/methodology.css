@@ -1,0 +1,124 @@
+/* Methodology page styles — layered on top of style.css */
+
+body {
+    overflow-y: auto;
+}
+
+.nav-link {
+    color: #4fc3f7;
+    text-decoration: none;
+    font-size: 13px;
+}
+.nav-link:hover { text-decoration: underline; }
+
+main.doc {
+    max-width: 880px;
+    margin: 24px auto 60px;
+    padding: 0 20px;
+    line-height: 1.65;
+    font-size: 15px;
+    color: #d8d8d8;
+}
+
+main.doc section {
+    margin-bottom: 36px;
+}
+
+main.doc h2 {
+    font-size: 20px;
+    color: #e94560;
+    border-bottom: 1px solid #0f3460;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+}
+
+main.doc p { margin-bottom: 10px; }
+
+main.doc ol, main.doc ul {
+    margin: 8px 0 10px 24px;
+}
+main.doc ol.compact li,
+main.doc ul.compact li {
+    margin: 2px 0;
+}
+
+main.doc ol.layers li {
+    margin: 10px 0;
+}
+
+.pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+.pill {
+    background: #0f3460;
+    border: 1px solid #1a4a7a;
+    color: #c9d6ea;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+}
+
+.eq {
+    background: #0b1530;
+    border-left: 3px solid #e94560;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 14px;
+    color: #ffd7dc;
+    border-radius: 3px;
+    overflow-x: auto;
+}
+
+main.doc code {
+    background: #0b1530;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    color: #ffd7dc;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 14px;
+}
+table th, table td {
+    border: 1px solid #0f3460;
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+}
+table th {
+    background: #0b1530;
+    color: #e94560;
+    font-weight: 600;
+}
+table.levels td .sw {
+    display: inline-block;
+    width: 26px;
+    height: 14px;
+    border-radius: 2px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.doc-footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #0f3460;
+    font-size: 12px;
+    color: #8a96b3;
+    text-align: center;
+}
+.doc-footer a { color: #4fc3f7; text-decoration: none; }
+.doc-footer a:hover { text-decoration: underline; }
+
+@media (max-width: 768px) {
+    main.doc { font-size: 14px; padding: 0 14px; }
+    main.doc h2 { font-size: 17px; }
+    .eq { font-size: 12.5px; }
+}

@@ -1,0 +1,61 @@
+# Dangkor District (ខណ្ឌដង្កោ), Phnom Penh, Cambodia
+# Source: GADM level-2 administrative boundary
+
+district_name: "Dangkor"
+district_name_km: "ដង្កោ"
+province: "Phnom Penh"
+country: "Cambodia"
+
+# Bounding box [west, south, east, north] in WGS84
+# Derived from GADM boundary with ~500m buffer
+bbox: [104.776, 11.417, 104.928, 11.528]
+
+# Grid configuration
+grid:
+  cell_size_m: 250          # meters per cell edge
+  id_prefix: "D"            # grid IDs: D-00001, D-00002, ...
+  crs: "EPSG:4326"          # coordinate reference system
+
+# Sample points for Open-Meteo forecast queries
+# 3x3 grid covering the bbox for IDW interpolation
+sample_points:
+  - {lat: 11.43, lon: 104.79}
+  - {lat: 11.43, lon: 104.85}
+  - {lat: 11.43, lon: 104.92}
+  - {lat: 11.47, lon: 104.79}
+  - {lat: 11.47, lon: 104.85}
+  - {lat: 11.47, lon: 104.92}
+  - {lat: 11.52, lon: 104.79}
+  - {lat: 11.52, lon: 104.85}
+  - {lat: 11.52, lon: 104.92}
+
+# Communes within Dangkor District
+# Source: https://en.wikipedia.org/wiki/Dangkao_District
+communes:
+  - "Cheung Aek"
+  - "Dangkao"
+  - "Kong Noy"
+  - "Krang Pongro"
+  - "Krang Thnong"
+  - "Prey Sa"
+  - "Prey Veaeng"
+  - "Preaek Kampues"
+  - "Preaek Thmei"
+  - "Roluos"
+  - "Sak Sampov"
+  - "Spean Thma"
+  - "Stueng Mean Chey"
+
+# Forecast configuration
+forecast:
+  horizon_hours: 72
+  timestep_hours: 6          # 6-hourly aggregation
+  models:                    # Open-Meteo NWP models
+    - "ecmwf_ifs04"
+    - "gfs_global"
+    - "icon_global"
+  archive_days: 7            # days of historical rainfall for antecedent moisture
+
+# Boundary file path (relative to project root)
+boundary_file: "data/static/dangkor_boundary.geojson"
+grid_file: "data/static/grid.geojson"

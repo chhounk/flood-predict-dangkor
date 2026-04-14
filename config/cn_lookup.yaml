@@ -1,0 +1,97 @@
+# SCS Curve Number lookup table
+# Maps ESA WorldCover 2021 land cover class x hydrologic soil group to CN
+#
+# ESA WorldCover classes: https://esa-worldcover.org/en
+# SCS CN values: USDA TR-55 (1986), adapted for tropical SE Asian conditions
+#
+# Hydrologic soil groups:
+#   A = deep sand/gravel (high infiltration)
+#   B = moderate depth, moderate infiltration
+#   C = shallow soil, clay subsoil (slow infiltration)
+#   D = heavy clay, high water table (very slow infiltration)
+#
+# Dangkor default: C/D mix — flat clay floodplain near Mekong/Bassac confluence
+default_soil_group: "D"
+
+# WorldCover class code -> soil group -> CN
+cn_table:
+  10:   # Tree cover
+    name: "Tree cover"
+    A: 30
+    B: 55
+    C: 70
+    D: 77
+  20:   # Shrubland
+    name: "Shrubland"
+    A: 35
+    B: 56
+    C: 70
+    D: 77
+  30:   # Grassland
+    name: "Grassland"
+    A: 39
+    B: 61
+    C: 74
+    D: 80
+  40:   # Cropland
+    name: "Cropland"
+    A: 67
+    B: 78
+    C: 85
+    D: 89
+  50:   # Built-up
+    name: "Built-up"
+    A: 77
+    B: 85
+    C: 90
+    D: 92
+  60:   # Bare / sparse vegetation
+    name: "Bare / sparse vegetation"
+    A: 77
+    B: 86
+    C: 91
+    D: 94
+  70:   # Snow and ice (not applicable for Dangkor)
+    name: "Snow and ice"
+    A: 50
+    B: 50
+    C: 50
+    D: 50
+  80:   # Permanent water bodies
+    name: "Permanent water bodies"
+    A: 98
+    B: 98
+    C: 98
+    D: 98
+  90:   # Herbaceous wetland
+    name: "Herbaceous wetland"
+    A: 85
+    B: 90
+    C: 94
+    D: 96
+  95:   # Mangroves
+    name: "Mangroves"
+    A: 80
+    B: 85
+    C: 90
+    D: 93
+  100:  # Moss and lichen (not applicable for Dangkor)
+    name: "Moss and lichen"
+    A: 50
+    B: 50
+    C: 50
+    D: 50
+
+# Antecedent Moisture Condition adjustments
+# Based on 5-day antecedent rainfall
+# Source: SCS NEH-4, Table 4.2
+amc:
+  dry:
+    threshold_mm: 12.7       # < 12.7mm in 5 days → AMC-I (dry)
+    cn_factor: 0.85          # multiply CN by this factor
+  normal:
+    threshold_mm: 38.1       # 12.7-38.1mm → AMC-II (normal, no adjustment)
+    cn_factor: 1.00
+  wet:
+    threshold_mm: 999.0      # > 38.1mm → AMC-III (wet)
+    cn_factor: 1.15          # multiply CN by this factor (cap at 98)
