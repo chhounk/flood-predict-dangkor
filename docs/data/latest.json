@@ -1,6 +1,6 @@
 {
-  "run_id": "2026-04-15T01:24:38Z",
-  "forecast_issued_at": "2026-04-15T01:24:38Z",
+  "run_id": "2026-04-15T01:59:08Z",
+  "forecast_issued_at": "2026-04-15T01:59:08Z",
   "horizon_hours": 72,
   "timestep_hours": 6,
   "engine_version": "engine-v0.1",
