@@ -22,5 +22,8 @@ requests>=2.31
 # Visualization (for grid verification PNG)
 matplotlib>=3.7
 
+# Database (optional — if SUPABASE_* env vars unset, sink is skipped)
+supabase>=2.7
+
 # Testing
 pytest>=7.4

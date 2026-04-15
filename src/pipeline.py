@@ -137,6 +137,17 @@ def run_pipeline() -> None:
     shutil.copy2(OUTPUT_DIR / "latest.geojson", docs_data / "latest.geojson")
     logger.info("Outputs written and copied to docs/ (%.1fs)", time.time() - t5)
 
+    # ---- Optional: Supabase ingestion (non-fatal) ----
+    t6 = time.time()
+    try:
+        from src.db.supabase_sink import ingest_run
+        with open(OUTPUT_DIR / "latest.json") as f:
+            latest = json.load(f)
+        if ingest_run(latest):
+            logger.info("Supabase ingestion complete (%.1fs)", time.time() - t6)
+    except Exception:
+        logger.warning("Supabase ingestion skipped: %s", traceback.format_exc())
+
     elapsed = time.time() - t_start
     logger.info("=== Pipeline complete: %.1fs ===", elapsed)
 
