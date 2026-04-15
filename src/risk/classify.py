@@ -133,7 +133,8 @@ def classify_cells(
 
         cells.append({
             "grid_id": props["grid_id"],
-            "commune": props.get("commune_name"),
+            "commune_id": props.get("commune_id"),
+            "commune_name": props.get("commune_name"),
             "centroid": [props["centroid_lat"], props["centroid_lon"]],
             "bbox": props.get("bbox", []),
             "static": {

@@ -86,8 +86,15 @@ def run_pipeline() -> None:
         logger.warning("Layer 3 — GPM signal unavailable: %s", traceback.format_exc())
         gpm_agreement = None
 
+    try:
+        from src.signals.jaxa_gsmap_signal import JAXAGSMaPSignal
+        jaxa_agreement = JAXAGSMaPSignal().fetch(district)
+    except Exception:
+        jaxa_agreement = None
+
     regional_signals = {
         "gpm_agreement": gpm_agreement,
+        "jaxa_gsmap": jaxa_agreement,  # Stubbed in v1
         "glofas": None,  # Stubbed in v1
     }
     logger.info("Layer 3 — Signals collected (%.1fs)", time.time() - t3)
@@ -168,7 +175,8 @@ def _placeholder_cells(
 
         cells.append({
             "grid_id": grid_id,
-            "commune": props.get("commune_name"),
+            "commune_id": props.get("commune_id"),
+            "commune_name": props.get("commune_name"),
             "centroid": [props["centroid_lat"], props["centroid_lon"]],
             "bbox": props.get("bbox", []),
             "static": {

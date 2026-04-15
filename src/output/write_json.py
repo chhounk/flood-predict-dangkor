@@ -46,6 +46,42 @@ def write_latest_json(
         level = str(cell.get("peak_level", 1))
         level_counts[level] = level_counts.get(level, 0) + 1
 
+    # Commune-level aggregation: worst-case P and affected extent per commune
+    commune_stats: dict[str, dict[str, Any]] = {}
+    for cell in cells:
+        c_id = cell.get("commune_id") or "UNKNOWN"
+        c_name = cell.get("commune_name") or "Unknown"
+        entry = commune_stats.setdefault(c_id, {
+            "commune_id": c_id,
+            "commune_name": c_name,
+            "cell_count": 0,
+            "peak_probability": 0.0,
+            "peak_level": 1,
+            "cells_l2_plus": 0,
+            "cells_l3_plus": 0,
+            "cells_l4": 0,
+        })
+        entry["cell_count"] += 1
+        p = cell.get("peak_probability", 0.0) or 0.0
+        if p > entry["peak_probability"]:
+            entry["peak_probability"] = p
+        lev = cell.get("peak_level", 1) or 1
+        if lev > entry["peak_level"]:
+            entry["peak_level"] = lev
+        if lev >= 2: entry["cells_l2_plus"] += 1
+        if lev >= 3: entry["cells_l3_plus"] += 1
+        if lev == 4: entry["cells_l4"] += 1
+
+    communes_ranking = []
+    for c in commune_stats.values():
+        n = max(c["cell_count"], 1)
+        c["affected_pct_l2_plus"] = round(100.0 * c["cells_l2_plus"] / n, 1)
+        c["affected_pct_l3_plus"] = round(100.0 * c["cells_l3_plus"] / n, 1)
+        communes_ranking.append(c)
+    communes_ranking.sort(
+        key=lambda x: (-x["peak_level"], -x["peak_probability"], -x["affected_pct_l3_plus"])
+    )
+
     # Find peak risk time
     peak_time = None
     max_p = 0.0
@@ -87,6 +123,7 @@ def write_latest_json(
             "peak_risk_time": peak_time,
             "window_peaks": window_peaks_summary,
         },
+        "communes": communes_ranking,
         "cells": cells,
     }
 

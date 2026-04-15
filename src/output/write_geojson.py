@@ -34,9 +34,13 @@ def write_latest_geojson(cells: list[dict[str, Any]]) -> Path:
         grid_id = feat["properties"]["grid_id"]
         cell_data = cell_lookup.get(grid_id, {})
 
+        static_props = feat["properties"]
         props = {
             "grid_id": grid_id,
-            "commune": cell_data.get("commune", feat["properties"].get("commune_name")),
+            "commune_id": static_props.get("commune_id"),
+            "commune_name": cell_data.get("commune_name") or static_props.get("commune_name"),
+            "centroid_lat": static_props.get("centroid_lat"),
+            "centroid_lon": static_props.get("centroid_lon"),
             "peak_level": cell_data.get("peak_level", 1),
             "peak_probability": cell_data.get("peak_probability", 0.0),
             "peak_time": cell_data.get("peak_time"),

@@ -1,0 +1,70 @@
+{
+  "communes": [
+    {
+      "commune_id": "CHEUNGAEK",
+      "commune_name": "CheungAek",
+      "cell_count": 230
+    },
+    {
+      "commune_id": "DANGKAO",
+      "commune_name": "Dangkao",
+      "cell_count": 236
+    },
+    {
+      "commune_id": "KONGNOY",
+      "commune_name": "KongNoy",
+      "cell_count": 61
+    },
+    {
+      "commune_id": "KRANGPONGRO",
+      "commune_name": "KrangPongro",
+      "cell_count": 126
+    },
+    {
+      "commune_id": "PONGTUEK",
+      "commune_name": "PongTuek",
+      "cell_count": 185
+    },
+    {
+      "commune_id": "PRATEAHLANG",
+      "commune_name": "PrateahLang",
+      "cell_count": 160
+    },
+    {
+      "commune_id": "PREAEKKAMPUES",
+      "commune_name": "PreaekKampues",
+      "cell_count": 198
+    },
+    {
+      "commune_id": "PREYSA",
+      "commune_name": "PreySa",
+      "cell_count": 225
+    },
+    {
+      "commune_id": "PREYVEAENG",
+      "commune_name": "PreyVeaeng",
+      "cell_count": 145
+    },
+    {
+      "commune_id": "ROLUOS",
+      "commune_name": "Roluos",
+      "cell_count": 78
+    },
+    {
+      "commune_id": "SAKSAMPOV",
+      "commune_name": "SakSampov",
+      "cell_count": 96
+    },
+    {
+      "commune_id": "SPEANTHMA",
+      "commune_name": "SpeanThma",
+      "cell_count": 129
+    },
+    {
+      "commune_id": "TIEN",
+      "commune_name": "Tien",
+      "cell_count": 87
+    }
+  ],
+  "total_cells": 1956
+}
