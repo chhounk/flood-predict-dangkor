@@ -177,7 +177,7 @@
                 <ol class="layers">
                     <li><strong>Layer 1 — Meteorological Driver.</strong> Multi-model rainfall forecasts (ECMWF IFS, GFS, ICON) pulled from Open-Meteo for 9 sample points on a 3×3 grid across the district, then interpolated to the 250 m grid via Inverse-Distance Weighting (IDW, power = 2).</li>
                     <li><strong>Layer 2 — Hydrological Response.</strong> SCS Curve Number runoff per cell, accumulated along a static flow-routing surface derived from Copernicus DEM (GLO-30) + pysheds D8. A Monte Carlo ensemble of N = 30 scenarios perturbs rainfall, curve number, and drainage capacity to produce a flood probability.</li>
-                    <li><strong>Layer 3 — Regional Signals.</strong> External signals act as amplifiers: GPM IMERG (observed precipitation proxy), JAXA GSMaP (independent satellite rainfall — v1.5), and GloFAS (river discharge — stub in v1).</li>
+                    <li><strong>Layer 3 — Regional Signals.</strong> Three external signals provide confidence context: (1) <em>Forecast verification</em> — compares yesterday's Open-Meteo forecast against the observed archive to score model accuracy; (2) <em>JAXA GSMaP NRT</em> — independent satellite rainfall from the joint NASA/JAXA GPM constellation, 0.1° hourly with ~4h latency; (3) <em>GloFAS</em> — Copernicus river discharge forecast (stub, pending integration). JAXA and forecast-verification are displayed as confidence indicators. GloFAS, when active, boosts the regional amplifier to 1.3.</li>
                     <li><strong>Layer 4 — Fusion &amp; Classification.</strong> Physics probability is multiplied by a regional amplifier, clipped to [0, 1], then binned into four risk levels.</li>
                 </ol>
             </section>
@@ -188,7 +188,7 @@
                     <thead><tr><th>Source</th><th>Layer</th><th>Use</th></tr></thead>
                     <tbody>
                         <tr><td>Open-Meteo (ECMWF IFS, GFS, ICON)</td><td>1</td><td>72 h rainfall forecast, multi-model ensemble</td></tr>
-                        <tr><td>Open-Meteo Archive</td><td>1, 3</td><td>7-day antecedent rainfall + GPM proxy</td></tr>
+                        <tr><td>Open-Meteo Archive</td><td>1, 3</td><td>7-day antecedent rainfall for AMC scaling (Layer 1); forecast verification signal — yesterday's forecast vs. observed archive (Layer 3)</td></tr>
                         <tr><td>Copernicus DEM GLO-30 (AWS S3)</td><td>2</td><td>Elevation, flow direction, flow accumulation, HAND</td></tr>
                         <tr><td>ESA WorldCover 2021 (COG /vsicurl)</td><td>2</td><td>Land-cover class → Curve Number</td></tr>
                         <tr><td>GADM level-2 &amp; level-3</td><td>Static</td><td>Dangkor boundary + 13 commune polygons</td></tr>
@@ -252,7 +252,7 @@
             <section>
                 <h3>9. Layer 4 — Fusion &amp; Classification</h3>
                 <div class="eq">P<sub>final</sub> = clip( P<sub>physics</sub> · α<sub>regional</sub>, 0, 1 )</div>
-                <p>α<sub>regional</sub> = 1.0 by default, boosted to 1.3 when GloFAS indicates active flood conditions.</p>
+                <p>α<sub>regional</sub> = 1.0 by default, boosted to 1.3 when GloFAS indicates active flood conditions. In v0.2, JAXA GSMaP and forecast-verification signals are displayed as confidence indicators only and do not alter α<sub>regional</sub> — active amplification is reserved for v1.0 pending re-validation.</p>
                 <table class="levels">
                     <thead><tr><th>Level</th><th>Probability</th><th>Label</th><th>Color</th></tr></thead>
                     <tbody>
