@@ -66,10 +66,10 @@
             <div class="sidebar-section">
                 <h3>Data Sources</h3>
                 <div id="source-status">
-                    <div class="source-row"><span class="dot dot-ok"></span> Open-Meteo (forecast)</div>
-                    <div class="source-row"><span class="dot" id="dot-gpm"></span> GPM IMERG (proxy) <span id="gpm-value" class="dot-badge">—</span></div>
-                    <div class="source-row"><span class="dot dot-stub"></span> JAXA GSMaP <span class="dot-badge">v1.5</span></div>
-                    <div class="source-row"><span class="dot dot-stub"></span> GloFAS discharge <span class="dot-badge">v1.5</span></div>
+                    <div class="source-row"><span class="dot dot-ok"></span> Open-Meteo (ECMWF/GFS/ICON)</div>
+                    <div class="source-row"><span class="dot" id="dot-gpm"></span> Forecast verification <span id="gpm-value" class="dot-badge">—</span></div>
+                    <div class="source-row"><span class="dot" id="dot-jaxa"></span> JAXA GSMaP NRT <span id="jaxa-value" class="dot-badge">—</span></div>
+                    <div class="source-row"><span class="dot dot-stub"></span> GloFAS discharge <span class="dot-badge">stub</span></div>
                     <div class="source-row"><span class="dot dot-ok"></span> Sentinel-1 SAR <span class="dot-badge">validated</span></div>
                 </div>
             </div>
@@ -192,9 +192,9 @@
                         <tr><td>Copernicus DEM GLO-30 (AWS S3)</td><td>2</td><td>Elevation, flow direction, flow accumulation, HAND</td></tr>
                         <tr><td>ESA WorldCover 2021 (COG /vsicurl)</td><td>2</td><td>Land-cover class → Curve Number</td></tr>
                         <tr><td>GADM level-2 &amp; level-3</td><td>Static</td><td>Dangkor boundary + 13 commune polygons</td></tr>
-                        <tr><td>GPM IMERG (proxy in v1)</td><td>3</td><td>Observed-rainfall agreement signal</td></tr>
-                        <tr><td>JAXA GSMaP NRT (v1.5)</td><td>3</td><td>Independent satellite rainfall — confirmation signal</td></tr>
-                        <tr><td>GloFAS (Copernicus CDS)</td><td>3</td><td>River discharge forecast — stub in v1</td></tr>
+                        <tr><td>Open-Meteo Archive</td><td>3</td><td>Forecast verification signal — compares yesterday's forecast to observed archive (not raw satellite)</td></tr>
+                        <tr><td>JAXA GSMaP NRT</td><td>3</td><td>Independent satellite rainfall confirmation — joint NASA/JAXA GPM constellation, 0.1° hourly, ~4h latency. Live when JAXA G-Portal credentials are configured.</td></tr>
+                        <tr><td>GloFAS (Copernicus CDS)</td><td>3</td><td>River discharge forecast — stub (pending Copernicus CDS integration)</td></tr>
                     </tbody>
                 </table>
             </section>

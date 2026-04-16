@@ -3,7 +3,7 @@
   "forecast_issued_at": "2026-04-16T07:24:26Z",
   "horizon_hours": 72,
   "timestep_hours": 6,
-  "engine_version": "engine-v0.1",
+  "engine_version": "engine-v0.2",
   "ensemble_size": 30,
   "models_used": [
     "ecmwf_ifs04",
@@ -11,9 +11,9 @@
     "icon_global"
   ],
   "regional_signals": {
-    "gpm_agreement": 0.95,
     "jaxa_gsmap": null,
-    "glofas": null
+    "glofas": null,
+    "forecast_obs_agreement": 0.95
   },
   "summary": {
     "cells_total": 1956,

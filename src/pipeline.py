@@ -124,9 +124,9 @@ def run_pipeline(reference_time: datetime | None = None) -> None:
         jaxa_agreement = None
 
     regional_signals = {
-        "gpm_agreement": gpm_agreement,
-        "jaxa_gsmap": jaxa_agreement,  # Stubbed in v1
-        "glofas": None,  # Stubbed in v1
+        "forecast_obs_agreement": gpm_agreement,   # Open-Meteo forecast vs archive verification
+        "jaxa_gsmap": jaxa_agreement,              # JAXA GSMaP NRT (live when credentials set)
+        "glofas": None,                            # GloFAS river discharge — stub
     }
     logger.info("Layer 3 — Signals collected (%.1fs)", time.time() - t3)
 

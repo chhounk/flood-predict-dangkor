@@ -215,15 +215,30 @@
     }
 
     function updateSourceStatus(d) {
-        var gpm = (d.regional_signals || {}).gpm_agreement;
+        var sig = d.regional_signals || {};
+        // Forecast-observation agreement (renamed from gpm_agreement)
+        var foa = sig.forecast_obs_agreement != null ? sig.forecast_obs_agreement : sig.gpm_agreement;
         var dot = document.getElementById('dot-gpm');
         var val = document.getElementById('gpm-value');
-        if (gpm != null) {
-            val.textContent = (gpm * 100).toFixed(0) + '%';
-            dot.className = 'dot ' + (gpm > 0.7 ? 'dot-ok' : 'dot-warn');
+        if (foa != null) {
+            val.textContent = (foa * 100).toFixed(0) + '%';
+            dot.className = 'dot ' + (foa > 0.7 ? 'dot-ok' : 'dot-warn');
         } else {
             val.textContent = 'n/a';
             dot.className = 'dot dot-stub';
+        }
+        // JAXA GSMaP
+        var jaxaDot = document.getElementById('dot-jaxa');
+        var jaxaVal = document.getElementById('jaxa-value');
+        if (jaxaDot && jaxaVal) {
+            var jaxa = sig.jaxa_gsmap;
+            if (jaxa != null) {
+                jaxaVal.textContent = (jaxa * 100).toFixed(0) + '%';
+                jaxaDot.className = 'dot ' + (jaxa > 0.7 ? 'dot-ok' : 'dot-warn');
+            } else {
+                jaxaVal.textContent = 'offline';
+                jaxaDot.className = 'dot dot-stub';
+            }
         }
     }
 
@@ -270,15 +285,16 @@
         // Meta
         var m = document.getElementById('meta-list');
         var sig = d.regional_signals || {};
+        var foa = sig.forecast_obs_agreement != null ? sig.forecast_obs_agreement : sig.gpm_agreement;
         m.innerHTML = ''
             + '<div><span class="k">run_id:</span> ' + d.run_id + '</div>'
             + '<div><span class="k">engine_version:</span> ' + d.engine_version + '</div>'
             + '<div><span class="k">models_used:</span> ' + (d.models_used || []).join(', ') + '</div>'
             + '<div><span class="k">ensemble_size:</span> ' + d.ensemble_size + '</div>'
             + '<div><span class="k">horizon:</span> ' + d.horizon_hours + 'h (' + d.timestep_hours + 'h steps)</div>'
-            + '<div><span class="k">gpm_agreement:</span> ' + (sig.gpm_agreement != null ? sig.gpm_agreement.toFixed(2) : 'n/a') + '</div>'
-            + '<div><span class="k">jaxa_gsmap:</span> ' + (sig.jaxa_gsmap != null ? sig.jaxa_gsmap.toFixed(2) : 'stub') + '</div>'
-            + '<div><span class="k">glofas:</span> ' + (sig.glofas != null ? sig.glofas.toFixed(2) : 'stub') + '</div>';
+            + '<div><span class="k">forecast_obs_agreement:</span> ' + (foa != null ? foa.toFixed(2) : 'n/a') + ' <span style="color:var(--text-dim);font-size:11px">(Open-Meteo forecast vs archive)</span></div>'
+            + '<div><span class="k">jaxa_gsmap:</span> ' + (sig.jaxa_gsmap != null ? sig.jaxa_gsmap.toFixed(2) + ' ✓' : '<span style="color:#f4a142">offline — awaiting credentials</span>') + '</div>'
+            + '<div><span class="k">glofas:</span> ' + (sig.glofas != null ? sig.glofas.toFixed(2) : '<span style="color:var(--text-dim)">stub</span>') + '</div>';
     }
 
     // ========== Helpers ==========

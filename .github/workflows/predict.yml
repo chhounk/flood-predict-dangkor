@@ -47,6 +47,8 @@ jobs:
         env:
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          JAXA_USERNAME:        ${{ secrets.JAXA_USERNAME }}
+          JAXA_PASSWORD:        ${{ secrets.JAXA_PASSWORD }}
         run: python -m src.pipeline
 
       - name: Commit and push outputs
