@@ -283,38 +283,33 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     # Format run_id for display (strip seconds for brevity)
     run_display = run_id[:16] if len(run_id) >= 16 else run_id
 
-    # Build commune lines
+    # Build commune lines (plain text — avoids MarkdownV2 escaping issues)
     commune_lines = ""
     if top3 and any(c.get("peak_probability", 0) > 0 for c in top3):
-        commune_lines = "\n*Highest-risk communes:*\n"
+        commune_lines = "\nHighest-risk communes:\n"
         for c in top3:
             name = c.get("commune_name", c.get("commune_id", "?"))
             prob = c.get("peak_probability", 0)
-            pct = c.get("affected_pct_l2_plus", 0)
-            commune_lines += f"  • {name}: {prob:.0%} \\({pct:.0f}% area at risk\\)\n"
+            commune_lines += f"  • {name}: {prob:.0%}\n"
 
     high_impact_note = ""
     pct_l3 = 100 * n_l3 / n_total if n_total else 0
     if pct_l3 >= 5.0:
-        high_impact_note = "\n🆘 *HIGH IMPACT* — over 5% of district cells at L3\\+ risk\\."
-
-    # Escape special chars for MarkdownV2 in dynamic values
-    run_esc = run_display.replace("-", "\\-").replace(":", "\\:").replace("T", "T")
+        high_impact_note = "\n🆘 HIGH IMPACT — over 5% of district at L3+ risk."
 
     text = (
-        f"{emoji} *Dangkor District — 72h Forecast*\n\n"
-        f"Alert level: *{level}*\n"
-        f"Mean probability: *{mean_prob:.1%}*\n"
+        f"{emoji} Dangkor District — 72h Forecast\n\n"
+        f"Alert level: {level}\n"
+        f"Mean probability: {mean_prob:.1%}\n"
         f"Peak probability: {max_prob:.1%}\n"
-        f"L2\\+ cells: {n_l2}/{n_total}  \\|  L3\\+: {n_l3}  \\|  L4: {n_l4}\n"
+        f"L2+ cells: {n_l2}/{n_total}  |  L3+: {n_l3}  |  L4: {n_l4}\n"
         f"{commune_lines}"
         f"{high_impact_note}\n"
-        f"_Run: {run_esc}_"
+        f"Run: {run_display}"
     )
 
     await update.message.reply_text(
         text,
-        parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=map_button(),
     )
 
