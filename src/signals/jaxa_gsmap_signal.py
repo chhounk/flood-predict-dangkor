@@ -13,8 +13,8 @@ Key specs
 
 Data access — JAXA G-Portal (free registration)
 -------------------------------------------------
-  Register:  https://gportal.jaxa.jp/gpr/registration.html
-  Then set:  JAXA_USERNAME=<your-email>
+  Register:  https://gportal.jaxa.jp/gpr/user/regist2
+  Then set:  JAXA_USERNAME=<your account username, NOT email>
              JAXA_PASSWORD=<your-password>
 
   Without credentials the signal returns None (shown as "offline" in
