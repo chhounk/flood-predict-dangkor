@@ -78,13 +78,11 @@ DEFAULT_LOOKBACK = 6
 # ── Run loading ───────────────────────────────────────────────────────────────
 
 def load_recent_runs(n: int) -> list[dict]:
-    """Load the N most recent live runs (current year) from history folder."""
+    """Load the N most recent live runs from history folder (any year)."""
     hist = OUTPUT_DIR / "history"
-    # Live runs: not 2024/2025 backfill; match current + recent years
-    all_files = sorted(hist.glob("202[6789]-*.json")) + sorted(hist.glob("203[0-9]-*.json"))
-    # Also include any very recent runs (in case year is still 2025 in test)
-    all_files += sorted(hist.glob("2025-*.json"))
-    all_files = sorted(set(all_files))
+    # Match all year prefixes — dispatcher is now the live alert system and
+    # must work regardless of which calendar year we are in.
+    all_files = sorted(hist.glob("20[0-9][0-9]-*.json"))
 
     runs = []
     for fp in reversed(all_files):   # newest first
@@ -276,6 +274,130 @@ def send_telegram(level: str, details: dict, communes: list[dict]):
         logger.error("Telegram send failed: %s %s", resp.status_code, resp.text)
 
 
+# ── Channel + subscriber broadcast ───────────────────────────────────────────
+
+MINI_APP_URL = "https://chhounk.github.io/flood-predict-dangkor/"
+
+_MAP_BUTTON = {
+    "inline_keyboard": [[
+        {
+            "text": "🌊 Open Live Map",
+            "web_app": {"url": MINI_APP_URL},
+        }
+    ]]
+}
+
+
+def _build_alert_text(level: str, details: dict, communes: list[dict]) -> str:
+    """Build the alert message text (same format as MESSAGES dict)."""
+    commune_block = format_commune_block(communes)
+    high_impact_note = (
+        "\n\n🆘 *HIGH IMPACT* — over 5% of district cells at Level 3+ risk."
+        if details.get("high_impact") else ""
+    )
+    msg_template = MESSAGES.get(level, MESSAGES["CLEAR"])
+    return msg_template.format(
+        commune_block=commune_block,
+        mean_prob=details.get("mean_prob", 0),
+        run_id=details.get("run_id", "?"),
+        high_impact_note=high_impact_note,
+    )
+
+
+def send_to_channel(
+    level: str,
+    details: dict,
+    communes: list[dict],
+    token: str,
+    channel_id: str,
+) -> None:
+    """Post the alert to @dangkor_flood_alert with an inline Open Live Map button."""
+    if not token:
+        logger.info("No TELEGRAM_BOT_TOKEN — skipping channel notification")
+        return
+
+    text = _build_alert_text(level, details, communes)
+    url  = f"https://api.telegram.org/bot{token}/sendMessage"
+    resp = http_requests.post(url, json={
+        "chat_id":      channel_id,
+        "text":         text,
+        "parse_mode":   "Markdown",
+        "reply_markup": _MAP_BUTTON,
+    }, timeout=10)
+
+    if resp.ok:
+        logger.info("Channel %s alert sent to %s", level, channel_id)
+    else:
+        logger.error("Channel send failed: %s %s", resp.status_code, resp.text)
+
+
+def send_to_subscribers(
+    level: str,
+    details: dict,
+    communes: list[dict],
+    token: str,
+) -> None:
+    """Send the alert to every active Supabase subscriber.
+
+    Silently skips if SUPABASE_URL / SUPABASE_SERVICE_KEY are not set.
+    """
+    if not token:
+        logger.info("No TELEGRAM_BOT_TOKEN — skipping subscriber broadcast")
+        return
+
+    sb_url = os.environ.get("SUPABASE_URL")
+    sb_key = os.environ.get("SUPABASE_SERVICE_KEY")
+    if not sb_url or not sb_key:
+        logger.info("No Supabase creds — skipping subscriber broadcast")
+        return
+
+    try:
+        from supabase import create_client  # imported lazily — not in base requirements.txt
+        sb = create_client(sb_url, sb_key)
+        result = (
+            sb.table("telegram_subscribers")
+            .select("chat_id")
+            .eq("active", True)
+            .execute()
+        )
+        subscribers = result.data or []
+    except Exception as exc:
+        logger.error("Failed to fetch subscribers from Supabase: %s", exc)
+        return
+
+    if not subscribers:
+        logger.info("No active subscribers — nothing to broadcast")
+        return
+
+    text = _build_alert_text(level, details, communes)
+    tg_url = f"https://api.telegram.org/bot{token}/sendMessage"
+    sent = 0
+    failed = 0
+
+    for row in subscribers:
+        chat_id = row.get("chat_id")
+        if not chat_id:
+            continue
+        try:
+            resp = http_requests.post(tg_url, json={
+                "chat_id":      chat_id,
+                "text":         text,
+                "parse_mode":   "Markdown",
+                "reply_markup": _MAP_BUTTON,
+            }, timeout=10)
+            if resp.ok:
+                sent += 1
+            else:
+                logger.warning("Subscriber send failed (chat_id=%s): %s", chat_id, resp.text)
+                failed += 1
+        except Exception as exc:
+            logger.warning("Subscriber send error (chat_id=%s): %s", chat_id, exc)
+            failed += 1
+
+    logger.info("Subscriber broadcast: %d sent, %d failed (total active: %d)",
+                sent, failed, len(subscribers))
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -348,8 +470,11 @@ def main():
     write_log_entry(level, details)
 
     # Send Telegram only on state change (or --force-notify)
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    channel_id = os.environ.get("TELEGRAM_CHANNEL_ID", "@dangkor_flood_alert")
     if state_changed or args.force_notify:
-        send_telegram(level, details, latest_run["communes"])
+        send_to_channel(level, details, latest_run["communes"], token, channel_id)
+        send_to_subscribers(level, details, latest_run["communes"], token)
     else:
         logger.info("State unchanged (%s) — no Telegram notification", level)
 

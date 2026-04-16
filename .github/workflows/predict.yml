@@ -51,6 +51,14 @@ jobs:
           JAXA_PASSWORD:        ${{ secrets.JAXA_PASSWORD }}
         run: python -m src.pipeline
 
+      - name: Send flood alerts
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          TELEGRAM_BOT_TOKEN:   ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID:  "@dangkor_flood_alert"
+        run: python scripts/alert_dispatcher.py
+
       - name: Commit and push outputs
         run: |
           git config user.name "github-actions[bot]"

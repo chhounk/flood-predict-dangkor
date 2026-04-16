@@ -1,0 +1,108 @@
+{
+  "n_cell_observations": 224940,
+  "n_s1_images": 115,
+  "flood_rate_observed": 0.0394,
+  "confusion_matrix": {
+    "TP": 5305,
+    "FP": 126512,
+    "FN": 3547,
+    "TN": 89576
+  },
+  "precision": 0.0402,
+  "recall": 0.5993,
+  "f1": 0.0754,
+  "brier_score": 0.2257,
+  "commune_stats": [
+    {
+      "commune_id": "PREYSA",
+      "precision": 0.058,
+      "recall": 0.658,
+      "observed_flood_rate": 0.052,
+      "n_obs": 25875
+    },
+    {
+      "commune_id": "PREYVEAENG",
+      "precision": 0.022,
+      "recall": 0.634,
+      "observed_flood_rate": 0.021,
+      "n_obs": 16675
+    },
+    {
+      "commune_id": "PRATEAHLANG",
+      "precision": 0.025,
+      "recall": 0.629,
+      "observed_flood_rate": 0.023,
+      "n_obs": 18400
+    },
+    {
+      "commune_id": "DANGKAO",
+      "precision": 0.046,
+      "recall": 0.627,
+      "observed_flood_rate": 0.044,
+      "n_obs": 27140
+    },
+    {
+      "commune_id": "SPEANTHMA",
+      "precision": 0.057,
+      "recall": 0.624,
+      "observed_flood_rate": 0.054,
+      "n_obs": 14835
+    },
+    {
+      "commune_id": "CHEUNGAEK",
+      "precision": 0.041,
+      "recall": 0.621,
+      "observed_flood_rate": 0.039,
+      "n_obs": 26450
+    },
+    {
+      "commune_id": "PREAEKKAMPUES",
+      "precision": 0.025,
+      "recall": 0.616,
+      "observed_flood_rate": 0.023,
+      "n_obs": 22770
+    },
+    {
+      "commune_id": "TIEN",
+      "precision": 0.051,
+      "recall": 0.589,
+      "observed_flood_rate": 0.053,
+      "n_obs": 10005
+    },
+    {
+      "commune_id": "PONGTUEK",
+      "precision": 0.016,
+      "recall": 0.577,
+      "observed_flood_rate": 0.017,
+      "n_obs": 21275
+    },
+    {
+      "commune_id": "KRANGPONGRO",
+      "precision": 0.046,
+      "recall": 0.561,
+      "observed_flood_rate": 0.045,
+      "n_obs": 14490
+    },
+    {
+      "commune_id": "ROLUOS",
+      "precision": 0.043,
+      "recall": 0.54,
+      "observed_flood_rate": 0.047,
+      "n_obs": 8970
+    },
+    {
+      "commune_id": "SAKSAMPOV",
+      "precision": 0.059,
+      "recall": 0.523,
+      "observed_flood_rate": 0.062,
+      "n_obs": 11040
+    },
+    {
+      "commune_id": "KONGNOY",
+      "precision": 0.068,
+      "recall": 0.47,
+      "observed_flood_rate": 0.08,
+      "n_obs": 7015
+    }
+  ]
+}
