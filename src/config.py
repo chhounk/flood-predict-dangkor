@@ -15,7 +15,7 @@ OUTPUT_DIR = DATA_DIR / "outputs"
 DOCS_DIR = PROJECT_ROOT / "docs"
 
 # Engine version — bump on meaningful changes
-ENGINE_VERSION = "engine-v0.1"
+ENGINE_VERSION = "engine-v0.2"
 
 
 def _load_yaml(filename: str) -> dict[str, Any]:

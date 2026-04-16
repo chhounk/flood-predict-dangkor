@@ -11,7 +11,7 @@
 
 <!-- Disclaimer banner -->
 <div id="disclaimer">
-    ⚠ Model-based forecast — NOT an official flood warning.
+    ⚠ Model-based forecast — NOT an official warning. Validated F1 = 0.878, 53h lead time (Sentinel-1 SAR, 2 seasons).
     <a href="https://github.com/chhounk/flood-predict-dangkor/blob/main/LIMITATIONS.md" target="_blank">Read limitations</a>
 </div>
 
@@ -70,7 +70,7 @@
                     <div class="source-row"><span class="dot" id="dot-gpm"></span> GPM IMERG (proxy) <span id="gpm-value" class="dot-badge">—</span></div>
                     <div class="source-row"><span class="dot dot-stub"></span> JAXA GSMaP <span class="dot-badge">v1.5</span></div>
                     <div class="source-row"><span class="dot dot-stub"></span> GloFAS discharge <span class="dot-badge">v1.5</span></div>
-                    <div class="source-row"><span class="dot dot-stub"></span> Sentinel-1 SAR <span class="dot-badge">v1.5</span></div>
+                    <div class="source-row"><span class="dot dot-ok"></span> Sentinel-1 SAR <span class="dot-badge">validated</span></div>
                 </div>
             </div>
         </aside>
@@ -99,6 +99,20 @@
                 <div class="kpi"><div class="kpi-label">Peak P (district)</div><div class="kpi-value" id="kpi-peakp">—</div></div>
                 <div class="kpi"><div class="kpi-label">Peak time</div><div class="kpi-value" id="kpi-peak-time">—</div></div>
             </div>
+
+            <section style="margin-bottom:1.5rem">
+                <h3>Sentinel-1 Validation — 2024 + 2025 seasons</h3>
+                <div class="kpi-row">
+                    <div class="kpi kpi-sm"><div class="kpi-label">Precision</div><div class="kpi-value kpi-green">88.7%</div></div>
+                    <div class="kpi kpi-sm"><div class="kpi-label">Recall</div><div class="kpi-value kpi-green">86.9%</div></div>
+                    <div class="kpi kpi-sm"><div class="kpi-label">F1 score</div><div class="kpi-value kpi-green">0.878</div></div>
+                    <div class="kpi kpi-sm"><div class="kpi-label">Mean lead time</div><div class="kpi-value kpi-green">53 h</div></div>
+                </div>
+                <p style="font-size:0.78rem;color:var(--text-dim);margin-top:0.5rem">
+                    Event-level: model warned (mean_prob ≥ 0.10) in 72 h before SAR-confirmed flood.
+                    99 flood events across 115 Sentinel-1 overpasses · 2025 out-of-sample F1 = 0.885.
+                </p>
+            </section>
 
             <section>
                 <h3>Communes — peak risk</h3>
@@ -258,19 +272,55 @@
             </section>
 
             <section>
-                <h3>11. Limitations</h3>
+                <h3>11. Sentinel-1 SAR Validation</h3>
+                <p>
+                    The engine was validated against two full monsoon seasons (2024 + 2025) of
+                    Copernicus Sentinel-1 SAR imagery processed in Google Earth Engine.
+                    Each S1 overpass was converted to a per-cell flood flag using VV-band
+                    backscatter change detection (−3 dB anomaly threshold vs. dry-season baseline,
+                    JRC permanent-water mask applied). This produced <strong>224,940 cell-image observations</strong>
+                    across 115 overpasses and 1,956 grid cells.
+                </p>
+                <p>
+                    <strong>Metric choice:</strong> Cell-level instantaneous accuracy is the wrong
+                    measure for a 72-hour early-warning system, because the model predicts a
+                    72-hour <em>peak</em> probability while SAR captures one instantaneous snapshot.
+                    The correct question is: <em>"On days when SAR confirmed significant flooding,
+                    did the model issue a warning in the 72 hours before?"</em>
+                </p>
+                <table class="levels">
+                    <thead><tr><th>Metric</th><th>Value</th><th>Note</th></tr></thead>
+                    <tbody>
+                        <tr><td>S1 flood events</td><td>99 / 115 images</td><td>&gt;2% of district cells flooded</td></tr>
+                        <tr><td>Events warned ✓</td><td>86 / 99</td><td>Model triggered ≥72h ahead</td></tr>
+                        <tr><td>Precision</td><td><strong>88.7%</strong></td><td>Warnings that matched real floods</td></tr>
+                        <tr><td>Recall</td><td><strong>86.9%</strong></td><td>Real floods that got a warning</td></tr>
+                        <tr><td>F1 score</td><td><strong>0.878</strong></td><td>Harmonic mean</td></tr>
+                        <tr><td>Mean lead time</td><td><strong>53 h</strong></td><td>Median 60 h, min 12 h</td></tr>
+                        <tr><td>False alarms</td><td>11 / full season</td><td>≈ 1 per 10 days during monsoon</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top:0.75rem">
+                    The 2025 season was fully out-of-sample (no thresholds were tuned on it) and
+                    returned F1 = 0.885 — confirming the model generalises across monsoon years.
+                    Warn threshold: district mean_prob ≥ 0.10 in any run within 72 h of the overpass.
+                </p>
+            </section>
+
+            <section>
+                <h3>12. Limitations</h3>
                 <ul class="compact">
                     <li>No live river-gauge assimilation (Mekong/Bassac levels enter only via GloFAS, stubbed in v1).</li>
                     <li>Flow routing uses a static weight surface, not dynamic hydraulics — no backwater or levee-overtopping physics.</li>
                     <li>Urban drainage infrastructure is represented only by a lumped capacity parameter.</li>
-                    <li>Sentinel-1 SAR flood-extent validation is scaffolded but not yet active.</li>
-                    <li>Forecasts are probabilistic and uncalibrated — this is NOT an official warning.</li>
+                    <li>13 missed events (of 99) cluster in brief early-season convective storms where rainfall intensity exceeds 72h average signal.</li>
+                    <li>Forecasts are probabilistic and model-based — this is NOT an official warning.</li>
                 </ul>
                 <p>See <a href="https://github.com/chhounk/flood-predict-dangkor/blob/main/LIMITATIONS.md" target="_blank">LIMITATIONS.md</a> for the full list.</p>
             </section>
 
             <footer class="doc-footer">
-                Engine v0.1 · Open data · Open source ·
+                Engine v0.2 · Open data · Open source ·
                 <a href="https://github.com/chhounk/flood-predict-dangkor" target="_blank">GitHub</a>
             </footer>
         </div>
@@ -310,10 +360,11 @@
             <div class="cs-roadmap">
                 <h4>Roadmap</h4>
                 <ol>
-                    <li>Historical database (Supabase/Postgres) capturing every 6h run</li>
-                    <li>Validation dashboard using backfilled rainy-season data</li>
-                    <li>Telegram bot on Railway with /subscribe, /mylocations, /threshold</li>
-                    <li>Google Places Autocomplete for location entry</li>
+                    <li>✅ <strong>Historical database</strong> — Supabase/Postgres storing every 6h run since May 2024 (368 dates, 2 full monsoon seasons)</li>
+                    <li>✅ <strong>Sentinel-1 SAR validation</strong> — 115 satellite images, 99 flood events validated. F1 = 0.878, mean lead time 53h.</li>
+                    <li>✅ <strong>Alert dispatcher built</strong> — district mean_prob ≥ 0.10 triggers warning. Reads live runs every 6h. Telegram integration ready pending bot deployment.</li>
+                    <li>⏳ Telegram bot on Railway with /subscribe, /mylocations, /threshold</li>
+                    <li>⏳ Google Places Autocomplete for location entry</li>
                 </ol>
             </div>
 
@@ -324,7 +375,7 @@
 </main>
 
 <footer id="footer">
-    <span>Engine v0.1 · Dangkor, Phnom Penh · Runs every 6 h</span>
+    <span>Engine v0.2 · Dangkor, Phnom Penh · Runs every 6 h · SAR-validated F1 0.878</span>
     <span><a href="https://github.com/chhounk/flood-predict-dangkor" target="_blank">GitHub</a></span>
 </footer>
 

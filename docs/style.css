@@ -354,6 +354,9 @@ table.levels td .sw {
 }
 .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); }
 .kpi-value { font-size: 22px; font-weight: 700; margin-top: 4px; }
+.kpi-sm .kpi-value { font-size: 18px; }
+.kpi-green { color: #4caf82; }
+.kpi-row + p { font-size: 0.78rem; color: var(--text-dim); }
 
 .meta-list {
     background: var(--bg-card);
