@@ -44,11 +44,17 @@ def _get_client():
         return None
 
 
-def ingest_run(latest: dict[str, Any]) -> bool:
+def ingest_run(latest: dict[str, Any], skip_cells: bool = False) -> bool:
     """Upsert one pipeline run (latest.json shape) into Supabase.
 
     Writes to three tables: runs, predictions, commune_predictions.
     Safe to call for the same run_id — ON CONFLICT behavior via upsert.
+
+    Args:
+        latest: The full latest.json payload.
+        skip_cells: If True, write only runs + commune_predictions (no per-cell
+            rows). Used for historical backfill to stay within free-tier storage.
+            ~1956 rows × 600 runs saved = ~1.2M rows skipped per 2 seasons.
 
     Returns:
         True on success, False otherwise. Never raises.
@@ -58,13 +64,13 @@ def ingest_run(latest: dict[str, Any]) -> bool:
         return False
 
     try:
-        return _do_ingest(client, latest)
+        return _do_ingest(client, latest, skip_cells=skip_cells)
     except Exception:
         logger.exception("Supabase sink: ingest failed (pipeline continues)")
         return False
 
 
-def _do_ingest(client, latest: dict[str, Any]) -> bool:
+def _do_ingest(client, latest: dict[str, Any], skip_cells: bool = False) -> bool:
     run_id: str = latest["run_id"]
     issued_at: str = latest.get("forecast_issued_at") or run_id
 
@@ -84,7 +90,11 @@ def _do_ingest(client, latest: dict[str, Any]) -> bool:
     logger.info("Supabase: upserted run %s", run_id)
 
     # 2) predictions rows ---------------------------------------------------
-    cells = latest.get("cells", [])
+    if skip_cells:
+        logger.info("Supabase: skip_cells=True — not writing predictions table")
+        cells = []
+    else:
+        cells = latest.get("cells", [])
     pred_rows = []
     for c in cells:
         centroid = c.get("centroid") or [None, None]

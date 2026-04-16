@@ -21,11 +21,25 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def run_pipeline() -> None:
-    """Run the full prediction pipeline."""
+def run_pipeline(reference_time: datetime | None = None) -> None:
+    """Run the full prediction pipeline.
+
+    Args:
+        reference_time: UTC datetime to "forecast from". Default None = live run
+            anchored at now. If set, runs in HISTORICAL mode:
+              - Layer 1 uses Open-Meteo archive (ERA5) for the 72h after ref_time
+              - run_id becomes the reference_time ISO string
+              - Does NOT overwrite docs/data/latest.* (live dashboard stays live)
+              - Supabase ingestion skips per-cell rows (aggregates only, free-tier safe)
+    """
     t_start = time.time()
-    run_id = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    logger.info("=== Pipeline start: %s ===", run_id)
+    historical = reference_time is not None
+    if historical:
+        run_id = reference_time.strftime("%Y-%m-%dT%H:%M:%SZ")
+        logger.info("=== Pipeline start (HISTORICAL): %s ===", run_id)
+    else:
+        run_id = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        logger.info("=== Pipeline start: %s ===", run_id)
 
     district = load_district()
     thresholds = load_thresholds()
@@ -45,9 +59,19 @@ def run_pipeline() -> None:
     # ---- Layer 1: Meteorological Driver ----
     t1 = time.time()
     try:
-        from src.data.fetch_open_meteo import fetch_forecasts, fetch_archive
-        forecasts = fetch_forecasts(district["sample_points"], forecast_cfg)
-        archive = fetch_archive(district["sample_points"], forecast_cfg)
+        from src.data.fetch_open_meteo import (
+            fetch_forecasts, fetch_archive, fetch_historical_forecast,
+        )
+        if historical:
+            forecasts = fetch_historical_forecast(
+                district["sample_points"], forecast_cfg, reference_time,
+            )
+        else:
+            forecasts = fetch_forecasts(district["sample_points"], forecast_cfg)
+        archive = fetch_archive(
+            district["sample_points"], forecast_cfg,
+            reference_time=reference_time,
+        )
         models_used = forecasts.get("models_used", forecast_cfg["models"])
         logger.info("Layer 1 — Forecast data fetched (%.1fs)", time.time() - t1)
     except Exception:
@@ -127,23 +151,30 @@ def run_pipeline() -> None:
         regional_signals=regional_signals,
         horizon_hours=horizon_hours,
         timestep_hours=timestep_hours,
+        historical=historical,
     )
-    write_latest_geojson(cells)
+    if not historical:
+        write_latest_geojson(cells)
 
-    # Copy to docs/data/ for dashboard
-    docs_data = DOCS_DIR / "data"
-    docs_data.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(OUTPUT_DIR / "latest.json", docs_data / "latest.json")
-    shutil.copy2(OUTPUT_DIR / "latest.geojson", docs_data / "latest.geojson")
-    logger.info("Outputs written and copied to docs/ (%.1fs)", time.time() - t5)
+        # Copy to docs/data/ for dashboard (live runs only)
+        docs_data = DOCS_DIR / "data"
+        docs_data.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(OUTPUT_DIR / "latest.json", docs_data / "latest.json")
+        shutil.copy2(OUTPUT_DIR / "latest.geojson", docs_data / "latest.geojson")
+        logger.info("Outputs written and copied to docs/ (%.1fs)", time.time() - t5)
+    else:
+        logger.info("Historical run — skipping geojson + dashboard copy (%.1fs)", time.time() - t5)
 
     # ---- Optional: Supabase ingestion (non-fatal) ----
     t6 = time.time()
     try:
         from src.db.supabase_sink import ingest_run
-        with open(OUTPUT_DIR / "latest.json") as f:
+        source_path = (OUTPUT_DIR / ("_historical_current.json" if historical else "latest.json"))
+        with open(source_path) as f:
             latest = json.load(f)
-        if ingest_run(latest):
+        # Historical runs skip the predictions table to stay within free-tier storage.
+        # Runs + commune_predictions are still stored — enough for all validation.
+        if ingest_run(latest, skip_cells=historical):
             logger.info("Supabase ingestion complete (%.1fs)", time.time() - t6)
     except Exception:
         logger.warning("Supabase ingestion skipped: %s", traceback.format_exc())
@@ -206,8 +237,15 @@ def _placeholder_cells(
 
 
 if __name__ == "__main__":
+    # Historical mode: set REFERENCE_TIME=2024-07-15T12:00:00Z to "forecast" from that past date
+    import os as _os
+    ref = _os.environ.get("REFERENCE_TIME")
+    reference_time = None
+    if ref:
+        reference_time = datetime.fromisoformat(ref.replace("Z", "+00:00"))
+
     try:
-        run_pipeline()
+        run_pipeline(reference_time=reference_time)
     except Exception as e:
         logger.error("Pipeline failed: %s", traceback.format_exc())
         # Write error file but don't overwrite good latest.json

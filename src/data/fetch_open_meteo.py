@@ -132,12 +132,15 @@ def _fetch_model_forecast(
 def fetch_archive(
     sample_points: list[dict[str, float]],
     forecast_cfg: dict[str, Any],
+    reference_time: datetime | None = None,
 ) -> dict[str, Any]:
-    """Fetch historical rainfall for the last N days (antecedent moisture).
+    """Fetch historical rainfall for the N days preceding reference_time.
 
     Args:
         sample_points: List of {lat, lon} dicts.
         forecast_cfg: Dict with 'archive_days' key.
+        reference_time: UTC anchor (default: now). Archive covers the
+            `archive_days` days immediately preceding this time.
 
     Returns:
         Dict with:
@@ -149,7 +152,9 @@ def fetch_archive(
     t0 = time.time()
     archive_days = forecast_cfg.get("archive_days", 7)
 
-    end_date = datetime.now(timezone.utc).date() - timedelta(days=1)
+    if reference_time is None:
+        reference_time = datetime.now(timezone.utc)
+    end_date = reference_time.date() - timedelta(days=1)
     start_date = end_date - timedelta(days=archive_days - 1)
 
     lats = ",".join(str(p["lat"]) for p in sample_points)
@@ -197,6 +202,93 @@ def fetch_archive(
         "times": times,
         "rainfall_mm": rainfall,
         "five_day_total_mm": five_day_total,
+    }
+
+
+def fetch_historical_forecast(
+    sample_points: list[dict[str, float]],
+    forecast_cfg: dict[str, Any],
+    reference_time: datetime,
+) -> dict[str, Any]:
+    """Fetch historical rainfall as a 'forecast' anchored to a past date.
+
+    Uses the Open-Meteo ARCHIVE endpoint (ERA5 reanalysis) to retrieve the
+    rainfall that actually occurred from reference_time to reference_time+horizon.
+    Mirrors the return shape of fetch_forecasts() so the rest of the pipeline
+    treats a historical run identically to a live run.
+
+    Args:
+        sample_points: List of {lat, lon} dicts.
+        forecast_cfg: Dict with 'horizon_hours' key (72 typical).
+        reference_time: UTC datetime anchor for the 72h "forecast" window.
+
+    Returns:
+        Same shape as fetch_forecasts — but models_used=['era5_reanalysis']
+        because archive data is a single reanalysis, not an NWP ensemble.
+        Monte Carlo perturbation remains the uncertainty source.
+    """
+    t0 = time.time()
+    horizon_hours = forecast_cfg["horizon_hours"]
+
+    # Archive API needs whole-day date range; we fetch 2 days and slice to hour.
+    start_date = reference_time.date()
+    end_date = (reference_time + timedelta(hours=horizon_hours)).date()
+
+    lats = ",".join(str(p["lat"]) for p in sample_points)
+    lons = ",".join(str(p["lon"]) for p in sample_points)
+
+    params = {
+        "latitude": lats,
+        "longitude": lons,
+        "hourly": "precipitation",
+        "start_date": start_date.isoformat(),
+        "end_date": end_date.isoformat(),
+        "timezone": "UTC",
+    }
+
+    resp = requests.get(ARCHIVE_URL, params=params, timeout=90)
+    resp.raise_for_status()
+    data = resp.json()
+
+    results = data if isinstance(data, list) else [data]
+    times_all = results[0]["hourly"]["time"]
+    n_points = len(sample_points)
+
+    # Find the index in `times_all` corresponding to reference_time
+    target_iso = reference_time.strftime("%Y-%m-%dT%H:00")
+    try:
+        start_idx = times_all.index(target_iso)
+    except ValueError:
+        # Fallback: nearest hour
+        start_idx = 0
+        for i, t in enumerate(times_all):
+            if t >= target_iso:
+                start_idx = i
+                break
+
+    end_idx = min(start_idx + horizon_hours, len(times_all))
+    times_slice = times_all[start_idx:end_idx]
+
+    rainfall = np.zeros((n_points, len(times_slice)), dtype=np.float64)
+    for i, result in enumerate(results):
+        precip_all = result["hourly"]["precipitation"]
+        precip_slice = precip_all[start_idx:end_idx]
+        rainfall[i, :] = [v if v is not None else 0.0 for v in precip_slice]
+
+    logger.info(
+        "Historical forecast fetch: %s +%dh, %d hours (%.1fs)",
+        reference_time.isoformat(), horizon_hours, len(times_slice), time.time() - t0,
+    )
+
+    return {
+        "points": sample_points,
+        "models_used": ["era5_reanalysis"],
+        "models_data": {
+            "era5_reanalysis": {
+                "times": times_slice,
+                "rainfall_mm": rainfall,
+            }
+        },
     }
 
 

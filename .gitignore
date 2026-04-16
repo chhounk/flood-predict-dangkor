@@ -30,3 +30,9 @@ data/static/worldcover_raw/
 # Temporary files
 *.tmp
 last_error.json
+
+# Historical backfill outputs — kept locally + in Supabase, not in git
+# (live 2026+ runs are still committed by the cron workflow)
+data/outputs/history/2024-*.json
+data/outputs/history/2025-*.json
+data/outputs/_historical_current.json

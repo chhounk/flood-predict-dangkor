@@ -23,6 +23,7 @@ def write_latest_json(
     regional_signals: dict[str, Any],
     horizon_hours: int = 72,
     timestep_hours: int = 6,
+    historical: bool = False,
 ) -> Path:
     """Write the full prediction output to latest.json and archive it.
 
@@ -127,9 +128,13 @@ def write_latest_json(
         "cells": cells,
     }
 
-    # Write latest.json
+    # Write latest.json (live runs only — historical runs must not overwrite it)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    latest_path = OUTPUT_DIR / "latest.json"
+    if historical:
+        # Write a temp "current" file for the sink to read, but don't touch latest.json
+        latest_path = OUTPUT_DIR / "_historical_current.json"
+    else:
+        latest_path = OUTPUT_DIR / "latest.json"
     with open(latest_path, "w") as f:
         json.dump(output, f, indent=2)
     logger.info("Wrote %s (%d cells)", latest_path, cells_total)
