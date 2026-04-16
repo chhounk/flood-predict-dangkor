@@ -50,7 +50,10 @@ SEASONS = [
 DAILY_HOUR = 12
 
 # Pause between runs to avoid hammering Open-Meteo's free endpoint.
-INTER_RUN_SLEEP_SEC = 2.0
+# 2s was too aggressive — a 30-min burst hit rate limits and poisoned ~36% of
+# runs with placeholder fallback. 4s + the per-request retry-with-backoff in
+# fetch_open_meteo buys enough headroom for a clean full-season sweep.
+INTER_RUN_SLEEP_SEC = 4.0
 
 
 def iter_dates(start: str, end: str, daily_hour: int = DAILY_HOUR):

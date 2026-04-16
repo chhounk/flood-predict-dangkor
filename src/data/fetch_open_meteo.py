@@ -8,6 +8,7 @@ All rainfall values are in mm (millimeters).
 """
 
 import logging
+import random
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -20,6 +21,42 @@ logger = logging.getLogger(__name__)
 # Open-Meteo API endpoints (free, no auth required)
 FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
 ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
+
+# Retry config — Open-Meteo free tier rate-limits bursts. Long historical
+# backfill loops WILL hit 429s; we need to survive them.
+_RETRY_STATUSES = {429, 500, 502, 503, 504}
+_MAX_ATTEMPTS = 5
+_BASE_BACKOFF_SEC = 2.0
+
+
+def _get_with_retry(url: str, params: dict, timeout: int = 90) -> dict:
+    """GET with exponential backoff on rate-limit / 5xx. Raises on final failure."""
+    last_exc: Exception | None = None
+    for attempt in range(1, _MAX_ATTEMPTS + 1):
+        try:
+            resp = requests.get(url, params=params, timeout=timeout)
+            if resp.status_code in _RETRY_STATUSES:
+                wait = _BASE_BACKOFF_SEC * (2 ** (attempt - 1)) + random.uniform(0, 1.0)
+                logger.warning(
+                    "Open-Meteo %d on attempt %d/%d — sleeping %.1fs",
+                    resp.status_code, attempt, _MAX_ATTEMPTS, wait,
+                )
+                time.sleep(wait)
+                continue
+            resp.raise_for_status()
+            return resp.json()
+        except (requests.ConnectionError, requests.Timeout) as e:
+            last_exc = e
+            wait = _BASE_BACKOFF_SEC * (2 ** (attempt - 1)) + random.uniform(0, 1.0)
+            logger.warning(
+                "Open-Meteo %s on attempt %d/%d — sleeping %.1fs",
+                type(e).__name__, attempt, _MAX_ATTEMPTS, wait,
+            )
+            time.sleep(wait)
+    raise RuntimeError(
+        f"Open-Meteo exhausted {_MAX_ATTEMPTS} attempts for {url} "
+        f"(last exc: {last_exc})"
+    )
 
 
 def fetch_forecasts(
@@ -107,9 +144,7 @@ def _fetch_model_forecast(
         "timezone": "UTC",
     }
 
-    resp = requests.get(FORECAST_URL, params=params, timeout=60)
-    resp.raise_for_status()
-    data = resp.json()
+    data = _get_with_retry(FORECAST_URL, params, timeout=60)
 
     # Open-Meteo returns a list when multiple coordinates are given
     if isinstance(data, list):
@@ -169,9 +204,7 @@ def fetch_archive(
         "timezone": "UTC",
     }
 
-    resp = requests.get(ARCHIVE_URL, params=params, timeout=60)
-    resp.raise_for_status()
-    data = resp.json()
+    data = _get_with_retry(ARCHIVE_URL, params, timeout=60)
 
     if isinstance(data, list):
         results = data
@@ -246,9 +279,7 @@ def fetch_historical_forecast(
         "timezone": "UTC",
     }
 
-    resp = requests.get(ARCHIVE_URL, params=params, timeout=90)
-    resp.raise_for_status()
-    data = resp.json()
+    data = _get_with_retry(ARCHIVE_URL, params, timeout=90)
 
     results = data if isinstance(data, list) else [data]
     times_all = results[0]["hourly"]["time"]

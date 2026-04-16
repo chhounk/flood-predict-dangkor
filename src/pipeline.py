@@ -57,6 +57,9 @@ def run_pipeline(reference_time: datetime | None = None) -> None:
     n_timesteps = horizon_hours // timestep_hours + 1  # include t=0
 
     # ---- Layer 1: Meteorological Driver ----
+    # In HISTORICAL mode, L1/L2 failures MUST raise — silently writing a
+    # placeholder archive file would poison the backfill resume cache.
+    # Live runs keep the forgiving fallback so the dashboard stays up.
     t1 = time.time()
     try:
         from src.data.fetch_open_meteo import (
@@ -75,6 +78,8 @@ def run_pipeline(reference_time: datetime | None = None) -> None:
         models_used = forecasts.get("models_used", forecast_cfg["models"])
         logger.info("Layer 1 — Forecast data fetched (%.1fs)", time.time() - t1)
     except Exception:
+        if historical:
+            raise
         logger.warning("Layer 1 — Using placeholder forecast data: %s", traceback.format_exc())
         forecasts = None
         archive = None
@@ -96,6 +101,8 @@ def run_pipeline(reference_time: datetime | None = None) -> None:
         )
         logger.info("Layer 2 — Ensemble complete (%.1fs)", time.time() - t2)
     except Exception:
+        if historical:
+            raise
         logger.warning("Layer 2 — Using placeholder physics: %s", traceback.format_exc())
         ensemble_size = 30
         physics_results = None
