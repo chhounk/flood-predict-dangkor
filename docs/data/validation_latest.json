@@ -1,56 +1,34 @@
 {
-  "validation_date": "2026-04-16",
-  "validation_type": "sentinel1_sar_event_level",
-  "engine_version": "engine-v0.2",
-  "seasons": ["2024", "2025"],
+  "validation_date": "2026-04-19",
+  "validation_type": "weekly",
+  "engine_version": "engine-v0.1",
   "period": {
-    "start": "2024-05-01",
-    "end": "2025-10-31"
+    "start": "2026-04-12",
+    "end": "2026-04-19"
   },
   "observations": {
-    "sentinel1_sar": "Copernicus S1 GRD VV backscatter, IW mode",
-    "n_images": 115,
-    "n_cells": 1956,
-    "cell_observations": 224940,
-    "flood_rate_observed": 0.039,
-    "source": "GEE reduceRegions, -3dB anomaly threshold, JRC permanent water mask"
+    "sentinel1_sar": null,
+    "ground_truth": null,
+    "source": "No observation data available in v1"
   },
-  "event_level_validation": {
-    "note": "An S1 image is a flood EVENT if >2% of district cells are flooded. Model WARNED if district mean_prob >= 0.10 in the 72h preceding the overpass.",
-    "n_flood_events": 99,
-    "n_dry_days": 16,
-    "warn_threshold": 0.10,
-    "lookback_hours": 72,
-    "true_positive": 86,
-    "false_negative": 13,
-    "false_positive": 11,
-    "true_negative": 5,
-    "precision": 0.887,
-    "recall": 0.869,
-    "f1": 0.878,
-    "lead_time_mean_hours": 53,
-    "lead_time_median_hours": 60,
-    "lead_time_min_hours": 12
+  "predictions_evaluated": 0,
+  "metrics": {
+    "pod": null,
+    "far": null,
+    "csi": null,
+    "bias": null,
+    "accuracy": null,
+    "note": "Metrics will be populated when observation data becomes available"
   },
-  "cell_level_validation": {
-    "note": "Cell-level metrics are not the right measure for a 72h early-warning system (temporal mismatch between peak_probability and instantaneous SAR snapshot). Shown for completeness only.",
-    "precision": 0.040,
-    "recall": 0.599,
-    "f1": 0.075,
-    "brier_score": 0.2257
+  "confusion_matrix": {
+    "true_positive": null,
+    "false_positive": null,
+    "true_negative": null,
+    "false_negative": null
   },
-  "threshold_sweep": [
-    {"threshold": 0.10, "precision": 0.887, "recall": 0.869, "f1": 0.878, "tp": 86, "fp": 11},
-    {"threshold": 0.15, "precision": 0.894, "recall": 0.848, "f1": 0.870, "tp": 84, "fp": 10},
-    {"threshold": 0.20, "precision": 0.886, "recall": 0.788, "f1": 0.834, "tp": 78, "fp": 10},
-    {"threshold": 0.25, "precision": 0.872, "recall": 0.687, "f1": 0.768, "tp": 68, "fp": 10},
-    {"threshold": 0.30, "precision": 0.899, "recall": 0.626, "f1": 0.738, "tp": 62, "fp":  7}
-  ],
   "notes": [
-    "2024 season: 42 S1 images, 31 flood events.",
-    "2025 season (out-of-sample): 73 S1 images, 68 flood events — F1=0.885 at threshold 0.10.",
-    "Model generalises well out-of-sample; 2025 was not used to tune any thresholds.",
-    "13 missed events cluster in early-season convective storms (brief, intense) and 2 dates with missing backfill data.",
-    "11 false alarms over a full monsoon season ≈ 1 per 10 days."
+    "Validation framework scaffolded \u2014 no observation data available yet.",
+    "Sentinel-1 SAR comparison is a documented TODO.",
+    "See src/validation/sentinel1_stub.py for implementation notes."
   ]
 }
