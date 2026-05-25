@@ -151,3 +151,4 @@
 {"logged_at": "2026-05-24T13:13:01.505556+00:00", "alert_level": "CLEAR", "run_id": "2026-05-24T13:12:48Z", "mean_prob": 0.0, "max_prob": 0.1, "pct_l2": 0.1, "pct_l3": 0.0, "pct_l4": 0.0, "n_runs_checked": 6, "high_impact": false}
 {"logged_at": "2026-05-24T19:09:49.872611+00:00", "alert_level": "CLEAR", "run_id": "2026-05-24T19:09:36Z", "mean_prob": 0.0, "max_prob": 0.067, "pct_l2": 0.0, "pct_l3": 0.0, "pct_l4": 0.0, "n_runs_checked": 6, "high_impact": false}
 {"logged_at": "2026-05-25T02:52:54.777728+00:00", "alert_level": "CLEAR", "run_id": "2026-05-25T02:52:41Z", "mean_prob": 0.035, "max_prob": 0.367, "pct_l2": 15.7, "pct_l3": 0.0, "pct_l4": 0.0, "n_runs_checked": 6, "high_impact": false}
+{"logged_at": "2026-05-25T09:56:21.271420+00:00", "alert_level": "CLEAR", "run_id": "2026-05-25T09:56:08Z", "mean_prob": 0.067, "max_prob": 0.433, "pct_l2": 32.5, "pct_l3": 0.4, "pct_l4": 0.0, "n_runs_checked": 6, "high_impact": false}
