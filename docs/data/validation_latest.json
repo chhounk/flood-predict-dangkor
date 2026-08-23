@@ -1,10 +1,10 @@
 {
-  "validation_date": "2026-08-16",
+  "validation_date": "2026-08-23",
   "validation_type": "weekly",
   "engine_version": "engine-v0.1",
   "period": {
-    "start": "2026-08-09",
-    "end": "2026-08-16"
+    "start": "2026-08-16",
+    "end": "2026-08-23"
   },
   "observations": {
     "sentinel1_sar": null,
